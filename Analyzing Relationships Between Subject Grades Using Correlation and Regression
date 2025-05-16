@@ -1,0 +1,30 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+data = {
+    'Math': [80, 85, 78, 92, 88],
+    'Arabic': [75, 89, 84, 91, 87],
+    'Data Science': [72, 83, 80, 90, 85],
+    'English': [65, 70, 68, 72, 75],
+    'Islamic':[33, 98, 49, 55, 59]
+}
+
+grades = pd.DataFrame(data)
+
+plt.figure(figsize=(4, 3))
+sns.regplot(data=grades, x="Islamic", y="Arabic", scatter=True, color='purple', ci=None, line_kws={"color": "black"})
+plt.title("Islamic vs Arabic Grades with Regression Line")
+plt.xlabel("Islamic ath Grade")
+plt.ylabel("Arabic Grade")
+plt.grid(True)
+plt.show()
+
+correlation_matrix = grades.corr()
+print("Correlation Matrix:")
+print(correlation_matrix)
+
+plt.figure(figsize=(4, 3))
+sns.heatmap(correlation_matrix, annot=True, cmap='Purples', linewidths=0.6)
+plt.title("Correlation Heatmap Between Subjects")
+plt.show()
