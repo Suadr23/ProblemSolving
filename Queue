@@ -1,0 +1,51 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+n_customers = 300
+arrival_rate = 1.5
+service_rate = 1.6
+n_servers = 2
+
+interarrival_times = np.random.exponential(1/arrival_rate, size=n_customers)
+arrival_times = np.cumsum(interarrival_times)
+service_times = np.random.exponential(1/service_rate, size=n_customers)
+
+start_service = np.zeros(n_customers)
+end_service = np.zeros(n_customers)
+server_available_times = np.zeros(n_servers)
+
+waiting_times = []
+
+for i in range(n_customers):
+    earliest_server = np.argmin(server_available_times)
+    start_time = max(arrival_times[i], server_available_times[earliest_server])
+    waiting_times.append(start_time - arrival_times[i])
+    start_service[i] = start_time
+    end_service[i] = start_time + service_times[i]
+    server_available_times[earliest_server] = end_service[i]
+
+df = pd.DataFrame({
+    'Customer': np.arange(1, n_customers + 1),
+    'Arrival Time': arrival_times,
+    'Service Start': start_service,
+    'Service End': end_service,
+    'Waiting Time': waiting_times,
+    'Service Time': service_times
+})
+
+time_points = np.arange(0, max(df['Service End']), 1)
+queue_lengths = []
+
+for time in time_points:
+    customers_in_queue = np.sum(arrival_times <= time) - np.sum(end_service <= time)
+    queue_lengths.append(customers_in_queue)
+
+plt.figure(figsize=(6, 6))
+plt.plot(time_points, queue_lengths, color='purple')
+plt.xlabel("Time")
+plt.ylabel("Number of Customers in Queue")
+plt.title("Salon Length Over Time During Eid")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
