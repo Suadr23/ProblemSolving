@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+mean = 3.2
+std_dev = 0.5
+
+x = np.linspace(1.5, 5, 500)
+y = (1 / (std_dev * np.sqrt(2 * np.pi))) * np.exp(-0.5 * ((x - mean) / std_dev) ** 2)
+
+ci_lower = mean - 1.96 * std_dev
+ci_upper = mean + 1.96 * std_dev
+
+plt.figure(figsize=(10, 5))
+plt.plot(x, y, color='purple', label='Normal Distribution Curve')
+plt.axvline(mean, color='black', linestyle='--', label=f'Mean = {mean}')
+plt.axvline(ci_lower, color='red', linestyle='--', label=f'95% CI Lower = {ci_lower:.2f}')
+plt.axvline(ci_upper, color='green', linestyle='--', label=f'95% CI Upper = {ci_upper:.2f}')
+plt.title('Sample Mean Distribuation')
+plt.xlabel('Value')
+plt.ylabel('Probability Density')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
