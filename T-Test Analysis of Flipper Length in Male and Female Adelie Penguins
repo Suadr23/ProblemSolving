@@ -1,0 +1,17 @@
+import seaborn as sns
+import pandas as pd
+from scipy.stats import ttest_ind
+import matplotlib.pyplot as plt
+
+penguins = sns.load_dataset("penguins")
+adelie = penguins[penguins["species"] == "Adelie"]
+adelie = adelie.dropna(subset=["flipper_length_mm", "sex"])
+
+male = adelie[adelie["sex"] == "Male"]["flipper_length_mm"]
+female = adelie[adelie["sex"] == "Female"]["flipper_length_mm"]
+
+t_stat, p_value = ttest_ind(male, female, equal_var=False)
+
+sns.barplot(x="sex", y="flipper_length_mm", data=adelie, ci="sd")
+plt.title(f"T-statistic: {t_stat:.2f}, P-value: {p_value:.4f}")
+plt.show()
