@@ -1,0 +1,64 @@
+CREATE TABLE EMPLOYEES (
+    Id VARCHAR(10) PRIMARY KEY,
+    Namee VARCHAR(50),
+    Age VARCHAR(50),
+    Address VARCHAR(100)
+);
+
+INSERT INTO EMPLOYEES (Id, Namee, Age, Address) VALUES
+('E01', 'Manii', '30', '123 Street A'),
+('E02', 'Kamal', '28', '456 Street B');
+
+UPDATE EMPLOYEES AS e1
+JOIN (
+    SELECT Address FROM EMPLOYEES WHERE Namee = 'Manii'
+) AS e2
+SET e1.Address = e2.Address
+WHERE e1.Id = 'E02';
+
+SELECT 
+    Namee, 
+    CAST(Age AS UNSIGNED) * 3 + 1 AS CalculatedValue 
+FROM EMPLOYEES;
+
+SELECT Namee 
+FROM EMPLOYEES 
+LIMIT 3;
+
+SELECT * 
+FROM EMPLOYEES
+WHERE Id > ANY (
+    SELECT Id FROM EMPLOYEES WHERE Id BETWEEN 'E02' AND 'E04'
+);
+
+SELECT * 
+FROM EMPLOYEES
+WHERE Id > ALL (
+    SELECT Id FROM EMPLOYEES WHERE Id BETWEEN 'E02' AND 'E04'
+);
+
+SELECT * 
+FROM EMPLOYEES
+WHERE Namee LIKE '_o%';
+
+SELECT * 
+FROM EMPLOYEES
+WHERE Id IN ('E02', 'E03', 'E05');
+
+SELECT * 
+FROM EMPLOYEES
+WHERE Id BETWEEN 'E01' AND 'E02';
+
+SELECT * 
+FROM EMPLOYEES
+ORDER BY Namee ASC;
+
+SELECT 
+    CONCAT(Namee, ' lives at ', Address) AS EmployeeDetails
+FROM EMPLOYEES;
+
+SELECT 
+    Namee,
+    COUNT(*) AS CountByName
+FROM EMPLOYEES
+GROUP BY Namee;
