@@ -1,0 +1,171 @@
+-- Create and use the 'sales' database
+CREATE DATABASE sales;
+USE sales;
+
+-- Drop tables if they already exist
+DROP TABLE IF EXISTS 
+    inventories, order_items, orders, contacts, customers, 
+    products, product_categories, employees, warehouses, 
+    locations, countries, regions;
+
+-- Create regions table
+CREATE TABLE regions (
+    region_id INT AUTO_INCREMENT PRIMARY KEY,
+    region_name VARCHAR(50) NOT NULL
+);
+
+-- Create countries table
+CREATE TABLE countries (
+    country_id CHAR(2) PRIMARY KEY,
+    country_name VARCHAR(40) NOT NULL,
+    region_id INT,
+    FOREIGN KEY (region_id) REFERENCES regions(region_id) ON DELETE CASCADE
+);
+
+-- Create locations table
+CREATE TABLE locations (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    address VARCHAR(255) NOT NULL,
+    postal_code VARCHAR(20),
+    city VARCHAR(50),
+    state VARCHAR(50),
+    country_id CHAR(2),
+    FOREIGN KEY (country_id) REFERENCES countries(country_id) ON DELETE CASCADE
+);
+
+-- Create warehouses table
+CREATE TABLE warehouses (
+    warehouse_id INT AUTO_INCREMENT PRIMARY KEY,
+    warehouse_name VARCHAR(255),
+    location_id INT,
+    FOREIGN KEY (location_id) REFERENCES locations(location_id) ON DELETE CASCADE
+);
+
+-- Create employees table
+CREATE TABLE employees (
+    employee_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    hire_date DATE NOT NULL,
+    manager_id INT,
+    job_title VARCHAR(255) NOT NULL,
+    FOREIGN KEY (manager_id) REFERENCES employees(employee_id) ON DELETE CASCADE
+);
+
+-- Create product categories table
+CREATE TABLE product_categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(255) NOT NULL
+);
+
+-- Create products table
+CREATE TABLE products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(255) NOT NULL,
+    description VARCHAR(2000),
+    standard_cost DECIMAL(9,2),
+    list_price DECIMAL(9,2),
+    category_id INT NOT NULL,
+    FOREIGN KEY (category_id) REFERENCES product_categories(category_id) ON DELETE CASCADE
+);
+
+-- Create customers table
+CREATE TABLE customers (
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    address VARCHAR(255),
+    website VARCHAR(255),
+    credit_limit DECIMAL(8,2)
+);
+
+-- Create contacts table
+CREATE TABLE contacts (
+    contact_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    phone VARCHAR(20),
+    customer_id INT,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
+);
+
+-- Create orders table
+CREATE TABLE orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    salesman_id INT,
+    order_date DATE NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE,
+    FOREIGN KEY (salesman_id) REFERENCES employees(employee_id) ON DELETE SET NULL
+);
+
+-- Create order_items table
+CREATE TABLE order_items (
+    order_id INT,
+    item_id INT,
+    product_id INT NOT NULL,
+    quantity DECIMAL(8,2) NOT NULL,
+    unit_price DECIMAL(8,2) NOT NULL,
+    PRIMARY KEY (order_id, item_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
+);
+
+-- Create inventories table
+CREATE TABLE inventories (
+    product_id INT,
+    warehouse_id INT,
+    quantity INT NOT NULL,
+    PRIMARY KEY (product_id, warehouse_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE,
+    FOREIGN KEY (warehouse_id) REFERENCES warehouses(warehouse_id) ON DELETE CASCADE
+);
+
+-- Queries for analysis
+
+-- Average product list price
+SELECT AVG(list_price) FROM products;
+
+-- Average product list price and max customer credit limit
+SELECT 
+    AVG(list_price) AS average_list_price,
+    MAX(credit_limit) AS max_credit_limit
+FROM 
+    products, customers;
+
+-- Minimum inventory quantity
+SELECT MIN(quantity) AS minimum_quantity FROM inventories;
+
+-- Total revenue from order_items
+SELECT SUM(quantity * unit_price) AS total_revenue FROM order_items;
+
+-- Total sales per order status (Note: total_amount column doesn't exist in current schema)
+-- SELECT status, SUM(total_amount) AS total_sales FROM sales GROUP BY status;
+
+-- Total quantity sold per product (above 200)
+SELECT product_id, SUM(quantity) AS total_quantity
+FROM order_items
+GROUP BY product_id
+HAVING SUM(quantity) > 200;
+
+-- Number of employees per job title
+SELECT job_title, COUNT(*) AS number_of_employees
+FROM employees
+GROUP BY job_title;
+
+-- Number of warehouses per country
+SELECT c.country_name, COUNT(*) AS total_warehouses
+FROM warehouses w
+JOIN locations l ON w.location_id = l.location_id
+JOIN countries c ON l.country_id = c.country_id
+GROUP BY c.country_name;
+
+-- Table structure and list
+DESCRIBE warehouses;
+SHOW TABLES;
+
+-- Ensure you're in the right database
+USE sales;
